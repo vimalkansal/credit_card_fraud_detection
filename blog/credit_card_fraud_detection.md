@@ -39,6 +39,13 @@ So, having understood that the autoencoders produce/predict the output which is 
 ## Implementation
 
 
+## Preprocessing
+### Standardization (Feature Scaling)
+It is a common requirement for many machine learning estimators: they might behave badly if the individual feature do not more or less look like standard normally distributed data…”.
+
+This means that before you start training or predicting on your dataset, you first need to eliminate the “oddballs”. You need to remove values that aren’t centered around 0, because they might throw off the learning your algorithm is doing. 
+
+It is a step of Data Pre Processing which is applied to independent variables or features of data. It basically helps to normalise the data within a particular range. Sometimes, it also helps in speeding up the calculations in an algorithm.
 
 
 
