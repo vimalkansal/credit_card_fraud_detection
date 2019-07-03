@@ -67,7 +67,7 @@ So when we say we want to train a model so it understands reality as clearly as 
 ## Training
 I trained the model for 100 epochs and plotted the losses vs epochs. As is clear from the diagram losses do nicely converge.
 
-[Insert picture here]
+![](training.png)
 
 
 
