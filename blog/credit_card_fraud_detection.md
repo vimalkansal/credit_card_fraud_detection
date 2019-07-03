@@ -1,4 +1,4 @@
-# Credit Card Fraud Detection Using Deep Learning
+# Credit Card Fraud Detection Using Deep Learning (PyTorch)
 
 ## Introduction
 
@@ -12,11 +12,9 @@ Data for this blog entry comes from [Kaggle](https://www.kaggle.com/mlg-ulb/cred
 
 The dataset consists of credit card transactions in September 2013 by european cardholders. This dataset contains transactions carried over a period 2 days and out of 284807 total transactions, 492 are marked as fraudulent. As is clear from this statistics (although it is given in the description of the dataset, the dataset is highly unbalanced : positive class (fraudulent) is only 0.172 %. Although this aspect of the data distribution in this case has already been mentioned, as an AI developer, embarking on modelling a problem like this (classification), studying the data distribution is one of the key exercises to understand your data. The dataset has been anonymised and many attributes (features) have been removed. Features (attributes) have been labelled as V1, V2,..and only numerical data is included (neural nets work on numbers !). When faced with a dataset and dataset having lots of attributes/features, one of the important data preparation steps is to keep only those features which do influence the model. Deciding on which features to keep has evolved into its own area of study called 'feature engineering'. One of the techniques to find out which features are important is called PCA - Principal Component Analysis (topic for another blog !). From the description of the dataset, it is clear that PCA has already been done, so we need not worry about that ! Only features not ransformed with PCA are 'Time' and 'Amount' . 'Time' contains the seconds elapsed between each transaction and the first transaction in the dataset. The feature 'Amount' is the transaction Amount, this feature can be used for example-dependant cost-senstive learning. Feature 'Class' is the response variable and it takes value 1 in case of fraud and 0 otherwise.
 
-In this blog entry, I show the use of one neural network architecture called 'Autoencoder'. 
+Although given the nature of this dataset (i.e avilability of labels), it is possible to implement it as a classification problem (Supervised learning) In this blog entry, I show the use of one neural network architecture called 'Autoencoder'. 
 
 ## Autoencoders
-
-To understand the autoencoder architecture, reader is assumed to have familiarity with some basics like "supervised learning" vs "unsupervised learning', backpropagation, target values etc. However, I will try to fill in details for readers not so familiar with the concepts.
 
 Autoencoders are artificial neural networks capable of learning efficient representations of the input data. This learned representation is called 'coding' and this learning happens unsupervised. Autoencoders have been used for various purposes in AI. For eaxample one of the most common requirement is that of reducing the dimension of input data.  The coding that autoencoder learns has much smaller dimension than the input. This architectural aspect of autoencoders make them very suitable for dimensionality reduction. Other use cases include unsupervised pretraining of deep neural networks, randomly generating data that looks very similar to the training data, which is called a generative model. An autoencoder can be trained on pictures of faces and then this trained network will be able to generate new faces.
 
@@ -37,6 +35,8 @@ So, having understood that the autoencoders produce/predict the output which is 
 
 
 ## Implementation
+There are various flvours of Autoencoders that one can implement. These flavours include : Undercomplete Autoencoders, Sparse autoencoders, DAE (Denoising Autoencoders), CAE (Contractive Autoencoders), Stacked denoising autoencoders, Deep autoencoders. I will not go into the details of these architectures here. Reader is encouraged to have a look at [this very nice entry](https://medium.com/datadriveninvestor/deep-learning-different-types-of-autoencoders-41d4fa5f7570)  
+I also use Pytorch for the implementation of the network in this blog entry. 
 
 
 ## Preprocessing
@@ -45,7 +45,33 @@ It is a common requirement for many machine learning estimators: they might beha
 
 This means that before you start training or predicting on your dataset, you first need to eliminate the “oddballs”. You need to remove values that aren’t centered around 0, because they might throw off the learning your algorithm is doing. 
 
-It is a step of Data Pre Processing which is applied to independent variables or features of data. It basically helps to normalise the data within a particular range. Sometimes, it also helps in speeding up the calculations in an algorithm.
+It is a step of Data Pre Processing which is applied to independent variables or features of data. It basically helps to normalise the data within a particular range. Sometimes, it also helps in speeding up the calculations in an algorithm. I will not discuss all the different types of preprocessing that one might be required to carry out when embarking on AI project. In this particular instance the provided data is mostly processed. As noted in the associated Jupyter notebook, we just look at the influence of 2 columns : "Time of transaction" and "Amount" for any influence they might have on the model . We note that Time is not a factor making any contribution to the fraudulent transactions, so we drop the column. For "Amount" column we standrdize it to unit variance and zero mean. Standardization of a dataset is a common requirement for many machine learning estimators: they might behave badly if the individual features do not more or less look like standard normally distributed data (e.g. Gaussian with 0 mean and unit variance).
+
+We also split the original dataset into traing and test datasets using the 80:20 rule. For the training dataset, we include only those transactions which are non fraudulent . Enforcing the requirement of minimising the reconstruction loss for this training set will force the model to learn representation which it can reproduce almost same as input. Our test dataset has both kinds of transactions. So what this means is this : a model trained in this fashion when presented with a non fraudulent entry and fraudulent entry, the reconstruction loss in the former will be significantly lower than the later !
+
+## Model
+Our model is implemented as a feed forward network consisting of 4 fully connected layers with 14, 7, 7, 29 neurons. First 2 layers act as encoder and the last 2 layers act as decoder. Note last layer has 29 nodes corresponding to 29 feature in the input data item. Following daigram shows the architecture of our network, along with the activation functions chosen for each layer. 
+### Activation Functions
+An A-NN at the end of the day is a function mapper i.e it maps the inputs to outputs. Our aim of training a model is figure out the form of this function which most closely represents the nature and form of the mapping. Now these mappings could be simple linear function or a complex function. Linear equations while easy to solve, are very limited in their capacity to learn more realistic complex patterns that exist in real life data. Role of an activation function at the output of nodes from a layer is to introduce this non-linearity before this output is fed forward to the following layer. A neural network without activation function would simply be a linear regression model, incapable of learning complex patterns. So more specifically, in A-NN we do the sum of products of inputs(X) and their corresponding Weights(W) and apply a Activation function f(x) to it to get the output of that layer and feed it as an input to the next layer.
+
+A variety of very interesting activation functions have been discovered and it continues to be an area of active research. We will not go into the details of these functions, a user is adviced to have a look at this [Wikipedia entry](https://en.wikipedia.org/wiki/Activation_function)
+Choice of which activation function to use in which situation is a combination of various things : actual knowledge aof mathematics behind the working of a particular AF, experience of working with similar domain and just trying out different functions, suffices to say that the choice of activation function can be deciding factor in the training and performance of the model.
+
+## Loss Function
+Loss function plays the role of a penalizer i.e it penalizes the model based on how far away model is from reality. Loss function along with an optimizer helps the model to get better and better at making predictions. Several loss functions exist for different types of problems and the choice depends on various factors like the type of problem, ease of derivative calculation etc. I will not go into the details of various loss functions, a read is advised to have a read of [this good survey of various loss functions](https://towardsdatascience.com/common-loss-functions-in-machine-learning-46af0ffc4d23). In our implementation we are using [Mean Squred Error loss function](https://en.wikipedia.org/wiki/Mean_squared_error)
+
+## Optimizer
+So when we say we want to train a model so it understands reality as clearly as possible, what is meant ? Training means we need to keep tweaking the parameters of model till it starts behaving the way we want it to behave. These parameters (also known as the weights are the reall juice of the model. An optimiers role is to use the loss function and continously prod the model towards optimal set of weights. A range of optimizers are available and continue to be an area of active research. For a comprehensive list and behaviour of various optimisers, [please refer to this blog entry](https://medium.com/datadriveninvestor/overview-of-different-optimizers-for-neural-networks-e0ed119440c3) In my implementation I chose to use Adam optimiser, choice depends on various factors - past experience, knowledge about the behaviour or pure trial !
+
+## Training
+I trained the model for 100 epochs and plotted the losses vs epochs. As is clear from the diagram losses do nicely converge.
+
+[Insert picture here]
+
+
+
+
+
 
 
 
