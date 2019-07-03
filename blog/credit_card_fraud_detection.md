@@ -69,6 +69,17 @@ I trained the model for 100 epochs and plotted the losses vs epochs. As is clear
 
 ![](training.png)
 
+## Evaluation
+
+Although model training losses seem to converge nicely, we still need to convince ourselves about the efficiency of model in predicting the frudulent cases. Here we do it in following ways :
+
+### Fraudulent vs non fraudulent reconstruction error losses.
+On comparing the bar diagrams of 2 cases we can see that whereas non fraudulent cases as expected show minimum reconstruction losses, quite a few fraudulent cases do show significant reconstruction error losses, which indicates that model is indeed able to detect fraudulent cases.
+### Reconstruction errors - Non Fraudulent
+![](non_fraudulent_loss.png)
+### Reconstruction errors - Non Fraudulent
+![](fraudulent_loss.png)
+
 
 
 
